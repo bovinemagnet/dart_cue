@@ -2,10 +2,11 @@
 /// sheets, built on the `dart_cue` library.
 ///
 /// Subcommands:
-///   info      <file> [--format text|json]   (default)
-///   validate  <file>                        exit 0 = clean, 1 = problems
-///   reformat  <file>                        parse → canonical CUE on stdout
-///   tracks    <file>                        one line per track
+///
+/// - `info      <file> [--format text|json]`  (default)
+/// - `validate  <file>`  exit 0 = clean, 1 = problems
+/// - `reformat  <file>`  parse → canonical CUE on stdout
+/// - `tracks    <file>`  one line per track
 library;
 
 import 'dart:convert';
@@ -179,9 +180,13 @@ void _printText(CueSheet sheet) {
         print('    INDEX ${e.key.toString().padLeft(2, '0')} '
             '${formatMsf(e.value)}');
       }
-      if (t.startTime != null) print('    Start     : ${formatMsf(t.startTime!)}');
+      if (t.startTime != null) {
+        print('    Start     : ${formatMsf(t.startTime!)}');
+      }
       if (t.endTime != null) print('    End       : ${formatMsf(t.endTime!)}');
-      if (t.duration != null) print('    Duration  : ${formatMsf(t.duration!)}');
+      if (t.duration != null) {
+        print('    Duration  : ${formatMsf(t.duration!)}');
+      }
     }
   }
 }
@@ -214,8 +219,7 @@ List<String> validateSheet(CueSheet sheet) {
     issues.add('no FILE entries');
   }
 
-  if (sheet.catalog != null &&
-      !RegExp(r'^\d{13}$').hasMatch(sheet.catalog!)) {
+  if (sheet.catalog != null && !RegExp(r'^\d{13}$').hasMatch(sheet.catalog!)) {
     issues.add('CATALOG "${sheet.catalog}" is not 13 digits');
   }
 
@@ -232,8 +236,7 @@ List<String> validateSheet(CueSheet sheet) {
       if (t.trackNumber < 1 || t.trackNumber > 99) {
         issues.add('$where: track number out of range (1-99)');
       }
-      if (previousTrackNumber != null &&
-          t.trackNumber <= previousTrackNumber) {
+      if (previousTrackNumber != null && t.trackNumber <= previousTrackNumber) {
         issues.add('$where: track number does not increase monotonically');
       }
       previousTrackNumber = t.trackNumber;

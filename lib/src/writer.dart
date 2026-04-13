@@ -43,10 +43,11 @@ String toCueString(CueSheet sheet) {
         writeLine('    REM ${entry.key} ${entry.value}');
       }
       if (track.flags.isNotEmpty) {
-        writeLine(
-            '    FLAGS ${track.flags.map((f) => f.toToken()).join(' ')}');
+        writeLine('    FLAGS ${track.flags.map((f) => f.toToken()).join(' ')}');
       }
-      if (track.pregap != null) writeLine('    PREGAP ${formatMsf(track.pregap!)}');
+      if (track.pregap != null) {
+        writeLine('    PREGAP ${formatMsf(track.pregap!)}');
+      }
 
       // Write indices sorted by index number.
       final sortedIndices = track.indices.entries.toList()
@@ -56,7 +57,9 @@ String toCueString(CueSheet sheet) {
             '    INDEX ${entry.key.toString().padLeft(2, '0')} ${formatMsf(entry.value)}');
       }
 
-      if (track.postgap != null) writeLine('    POSTGAP ${formatMsf(track.postgap!)}');
+      if (track.postgap != null) {
+        writeLine('    POSTGAP ${formatMsf(track.postgap!)}');
+      }
     }
   }
 

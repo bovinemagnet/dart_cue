@@ -41,7 +41,7 @@ web.
 
 ```yaml
 dependencies:
-  dart_cue: ^0.0.3
+  dart_cue: ^0.0.4
 ```
 
 ## Usage

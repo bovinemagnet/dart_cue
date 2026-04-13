@@ -148,8 +148,10 @@ FILE "a.wav" WAVE
     });
 
     test('unknown track type silently defaults to AUDIO', () {
-      const cue = 'FILE "a.wav" WAVE\n  TRACK 01 WEIRD\n    INDEX 01 00:00:00\n';
-      expect(parseCueSheet(cue)!.files[0].tracks[0].trackType, CueTrackType.audio);
+      const cue =
+          'FILE "a.wav" WAVE\n  TRACK 01 WEIRD\n    INDEX 01 00:00:00\n';
+      expect(
+          parseCueSheet(cue)!.files[0].tracks[0].trackType, CueTrackType.audio);
     });
 
     test('REM with no value stores empty string', () {
@@ -244,8 +246,7 @@ FILE "a.wav" WAVE
     });
 
     test('pure binary garbage → null or non-crashing result', () {
-      final garbage = Uint8List.fromList(
-          List<int>.generate(256, (i) => i));
+      final garbage = Uint8List.fromList(List<int>.generate(256, (i) => i));
       expect(() => parseCueBytes(garbage), returnsNormally);
     });
 

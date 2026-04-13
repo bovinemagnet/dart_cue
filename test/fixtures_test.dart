@@ -34,8 +34,7 @@ void main() {
 
     test('single FILE with quoted filename containing spaces', () {
       expect(sheet.files.length, 1);
-      expect(sheet.files[0].filename,
-          'Fictional Band - Imaginary Album.wav');
+      expect(sheet.files[0].filename, 'Fictional Band - Imaginary Album.wav');
       expect(sheet.files[0].fileType, CueFileType.wave);
     });
 
@@ -61,8 +60,7 @@ void main() {
       expect(reparsed.title, sheet.title);
       expect(reparsed.files[0].tracks.length, 4);
       for (var i = 0; i < 4; i++) {
-        expect(reparsed.files[0].tracks[i].isrc,
-            sheet.files[0].tracks[i].isrc);
+        expect(reparsed.files[0].tracks[i].isrc, sheet.files[0].tracks[i].isrc);
         expect(reparsed.files[0].tracks[i].startTime,
             sheet.files[0].tracks[i].startTime);
       }
@@ -87,8 +85,8 @@ void main() {
       for (final t in sheet.files[0].tracks) {
         expect(t.flags.contains(CueFlag.dcp), isTrue);
       }
-      expect(sheet.files[0].tracks[2].flags.contains(CueFlag.preEmphasis),
-          isTrue);
+      expect(
+          sheet.files[0].tracks[2].flags.contains(CueFlag.preEmphasis), isTrue);
     });
 
     test('PREGAP captured on data→audio transition', () {

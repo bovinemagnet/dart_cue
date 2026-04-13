@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.4
+
+- Fix pub.dev scoring: escape angle brackets in `bin/cueinfo.dart` doc
+  comments, wrap single-statement `if` bodies in blocks to satisfy
+  `curly_braces_in_flow_control_structures`, and re-run `dart format`
+  across the tree. No behavioural changes.
+
 ## 0.0.3
 
 - `CueSheet.replayGainAlbumGain` / `replayGainAlbumPeak` and

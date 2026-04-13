@@ -119,14 +119,16 @@ void main() {
     });
 
     test('AIFC file type round-trips', () {
-      final cue = 'FILE "a.aifc" AIFC\n  TRACK 01 AUDIO\n    INDEX 01 00:00:00\n';
+      final cue =
+          'FILE "a.aifc" AIFC\n  TRACK 01 AUDIO\n    INDEX 01 00:00:00\n';
       final original = parseCueSheet(cue)!;
       final reparsed = parseCueSheet(toCueString(original))!;
       expect(reparsed.files[0].fileType, CueFileType.aifc);
     });
 
     test('DATA track type and FLAGS DATA round-trip', () {
-      final cue = 'FILE "a.bin" BINARY\n  TRACK 01 DATA\n    FLAGS DATA\n    INDEX 01 00:00:00\n';
+      final cue =
+          'FILE "a.bin" BINARY\n  TRACK 01 DATA\n    FLAGS DATA\n    INDEX 01 00:00:00\n';
       final reparsed = parseCueSheet(toCueString(parseCueSheet(cue)!))!;
       expect(reparsed.files[0].tracks[0].trackType, CueTrackType.data);
       expect(reparsed.files[0].tracks[0].flags, contains(CueFlag.data));
@@ -193,7 +195,8 @@ FILE "a.wav" WAVE
       expect(reparsed.remComments['GENRE'], 'Rock');
       expect(reparsed.files[0].tracks[0].remComments['REPLAYGAIN_TRACK_GAIN'],
           '-6.12 dB');
-      expect(reparsed.remComments.containsKey('REPLAYGAIN_TRACK_GAIN'), isFalse);
+      expect(
+          reparsed.remComments.containsKey('REPLAYGAIN_TRACK_GAIN'), isFalse);
     });
   });
 }

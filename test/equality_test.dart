@@ -45,8 +45,8 @@ void main() {
 
     test('differs when album-level field changes', () {
       final a = parseCueSheet(_sampleCue)!;
-      final b = parseCueSheet(_sampleCue.replaceAll(
-          'TITLE "Great Album"', 'TITLE "Other Album"'))!;
+      final b = parseCueSheet(
+          _sampleCue.replaceAll('TITLE "Great Album"', 'TITLE "Other Album"'))!;
       expect(a, isNot(equals(b)));
     });
 
@@ -132,8 +132,8 @@ void main() {
 
     test('differs when a contained track differs', () {
       final a = parseCueSheet(_sampleCue)!.files[0];
-      final b = parseCueSheet(_sampleCue.replaceAll(
-          'TITLE "One"', 'TITLE "Changed"'))!
+      final b = parseCueSheet(
+              _sampleCue.replaceAll('TITLE "One"', 'TITLE "Changed"'))!
           .files[0];
       expect(a, isNot(equals(b)));
     });

@@ -2,7 +2,7 @@ name: dart_cue
 description: >-
   A pure Dart CUE sheet parser and serialiser for album, track, and index
   metadata with lossless round-trip support and no runtime dependencies.
-version: 0.0.3
+version: 0.0.4
 repository: https://github.com/bovinemagnet/dart_cue
 issue_tracker: https://github.com/bovinemagnet/dart_cue/issues
 

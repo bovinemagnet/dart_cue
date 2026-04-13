@@ -31,8 +31,8 @@ void main() {
       expect(_parse('REM REPLAYGAIN_ALBUM_GAIN -5 dB').replayGainAlbumGain, -5);
       expect(_parse('REM REPLAYGAIN_ALBUM_GAIN -5 DB').replayGainAlbumGain, -5);
       expect(_parse('REM REPLAYGAIN_ALBUM_GAIN -5dB').replayGainAlbumGain, -5);
-      expect(_parse('REM REPLAYGAIN_ALBUM_GAIN +3.5 dB').replayGainAlbumGain,
-          3.5);
+      expect(
+          _parse('REM REPLAYGAIN_ALBUM_GAIN +3.5 dB').replayGainAlbumGain, 3.5);
     });
 
     test('missing REM → null', () {
@@ -54,8 +54,9 @@ void main() {
 
   group('CueTrack — track ReplayGain', () {
     test('parses REPLAYGAIN_TRACK_GAIN and PEAK', () {
-      final sheet = _parse('', track: '    REM REPLAYGAIN_TRACK_GAIN -5.43 dB\n'
-          '    REM REPLAYGAIN_TRACK_PEAK 0.976543');
+      final sheet = _parse('',
+          track: '    REM REPLAYGAIN_TRACK_GAIN -5.43 dB\n'
+              '    REM REPLAYGAIN_TRACK_PEAK 0.976543');
       final track = sheet.files[0].tracks[0];
       expect(track.replayGainTrackGain, -5.43);
       expect(track.replayGainTrackPeak, closeTo(0.976543, 1e-9));

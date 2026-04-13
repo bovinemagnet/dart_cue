@@ -12,7 +12,8 @@ import 'msf.dart';
 ///
 /// Returns `null` when [content] is blank or contains no recognisable data.
 CueSheet? parseCueSheet(String content) {
-  final lines = content.replaceAll('\r\n', '\n').replaceAll('\r', '\n').split('\n');
+  final lines =
+      content.replaceAll('\r\n', '\n').replaceAll('\r', '\n').split('\n');
   return _Parser(lines).parse();
 }
 

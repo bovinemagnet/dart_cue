@@ -18,8 +18,7 @@ Duration? parseMsf(String msf) {
   final ff = int.tryParse(parts[2]);
   if (mm == null || ss == null || ff == null) return null;
   if (mm < 0 || ss < 0 || ss > 59 || ff < 0 || ff > 74) return null;
-  final totalMs =
-      mm * 60 * 1000 + ss * 1000 + ff * 1000 ~/ _framesPerSecond;
+  final totalMs = mm * 60 * 1000 + ss * 1000 + ff * 1000 ~/ _framesPerSecond;
   return Duration(milliseconds: totalMs);
 }
 

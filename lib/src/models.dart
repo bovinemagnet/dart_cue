@@ -326,8 +326,7 @@ class CueTrack {
       );
 
   @override
-  String toString() =>
-      'CueTrack(#$trackNumber ${trackType.toLabel()}'
+  String toString() => 'CueTrack(#$trackNumber ${trackType.toLabel()}'
       '${title == null ? '' : ' "$title"'})';
 }
 
@@ -357,8 +356,7 @@ class CueFile {
           _listEq(tracks, other.tracks);
 
   @override
-  int get hashCode =>
-      Object.hash(filename, fileType, _listHash(tracks));
+  int get hashCode => Object.hash(filename, fileType, _listHash(tracks));
 
   @override
   String toString() =>
@@ -462,8 +460,7 @@ class CueSheet {
 
   @override
   String toString() {
-    final trackCount =
-        files.fold<int>(0, (sum, f) => sum + f.tracks.length);
+    final trackCount = files.fold<int>(0, (sum, f) => sum + f.tracks.length);
     return 'CueSheet('
         '${title == null ? '' : '"$title" '}'
         '${files.length} files, $trackCount tracks)';

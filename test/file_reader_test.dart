@@ -56,7 +56,8 @@ FILE "album.wav" WAVE
 
   group('parseCueBytes', () {
     test('parses UTF-8 bytes', () {
-      const content = 'TITLE "Bytes Album"\nFILE "a.wav" WAVE\n  TRACK 01 AUDIO\n    INDEX 01 00:00:00\n';
+      const content =
+          'TITLE "Bytes Album"\nFILE "a.wav" WAVE\n  TRACK 01 AUDIO\n    INDEX 01 00:00:00\n';
       final bytes = Uint8List.fromList(content.codeUnits);
       final sheet = parseCueBytes(bytes);
       expect(sheet, isNotNull);
@@ -64,15 +65,18 @@ FILE "album.wav" WAVE
     });
 
     test('strips UTF-8 BOM', () {
-      const content = 'TITLE "BOM Album"\nFILE "a.wav" WAVE\n  TRACK 01 AUDIO\n    INDEX 01 00:00:00\n';
-      final bytes = Uint8List.fromList(<int>[0xEF, 0xBB, 0xBF, ...utf8.encode(content)]);
+      const content =
+          'TITLE "BOM Album"\nFILE "a.wav" WAVE\n  TRACK 01 AUDIO\n    INDEX 01 00:00:00\n';
+      final bytes =
+          Uint8List.fromList(<int>[0xEF, 0xBB, 0xBF, ...utf8.encode(content)]);
       final sheet = parseCueBytes(bytes);
       expect(sheet, isNotNull);
       expect(sheet!.title, 'BOM Album');
     });
 
     test('decodes UTF-16 LE with BOM', () {
-      const content = 'TITLE "UTF16 LE"\nFILE "a.wav" WAVE\n  TRACK 01 AUDIO\n    INDEX 01 00:00:00\n';
+      const content =
+          'TITLE "UTF16 LE"\nFILE "a.wav" WAVE\n  TRACK 01 AUDIO\n    INDEX 01 00:00:00\n';
       final body = <int>[];
       for (final code in content.codeUnits) {
         body.add(code & 0xFF);
@@ -85,7 +89,8 @@ FILE "album.wav" WAVE
     });
 
     test('decodes UTF-16 BE with BOM', () {
-      const content = 'TITLE "UTF16 BE"\nFILE "a.wav" WAVE\n  TRACK 01 AUDIO\n    INDEX 01 00:00:00\n';
+      const content =
+          'TITLE "UTF16 BE"\nFILE "a.wav" WAVE\n  TRACK 01 AUDIO\n    INDEX 01 00:00:00\n';
       final body = <int>[];
       for (final code in content.codeUnits) {
         body.add((code >> 8) & 0xFF);

@@ -26,8 +26,7 @@ void main() {
   setUp(() => sheet = parseCueSheet(_cue)!);
 
   test('sheet.files is unmodifiable', () {
-    expect(() => sheet.files.add(sheet.files.first),
-        throwsUnsupportedError);
+    expect(() => sheet.files.add(sheet.files.first), throwsUnsupportedError);
     expect(() => sheet.files.clear(), throwsUnsupportedError);
   });
 
