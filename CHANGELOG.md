@@ -8,6 +8,16 @@
   available on the Dart VM and Flutter (mobile, desktop) as before; on
   the web it throws `UnsupportedError` with a clear message pointing
   callers at `parseCueBytes`. Closes #6.
+- `parseCueSheetWithDiagnostics(String)` returns a `ParseResult { sheet,
+  issues }` with line-numbered warnings for unknown FILE/TRACK/FLAGS
+  tokens, malformed INDEX/PREGAP/POSTGAP timestamps, out-of-place
+  commands and non-numeric TRACK numbers. The default `parseCueSheet`
+  stays permissive and silent. Structural checks (missing `INDEX 01`,
+  non-monotonic track numbers, malformed `CATALOG`/`ISRC`, …) are also
+  exposed as `validateCueSheet(CueSheet)` for hand-built sheets. New
+  exported types: `CueIssue`, `CueIssueSeverity`, `ParseResult`. The
+  `cueinfo validate` subcommand now uses the library implementation.
+  Closes #4.
 
 ## 0.0.4
 

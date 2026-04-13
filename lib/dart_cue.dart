@@ -14,7 +14,9 @@ library dart_cue;
 
 export 'src/models.dart';
 export 'src/msf.dart';
-export 'src/parser.dart' show parseCueSheet;
+export 'src/diagnostics.dart';
+export 'src/parser.dart'
+    show parseCueSheet, parseCueSheetWithDiagnostics, validateCueSheet;
 export 'src/file_reader.dart' show parseCueBytes;
 export 'src/file_io.dart' show parseCueFile;
 export 'src/writer.dart' show toCueString;

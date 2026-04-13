@@ -30,7 +30,8 @@ No runtime dependencies. Works on the Dart VM, AOT binaries, Flutter
 - Encoding detection: UTF-8, UTF-16 LE and UTF-16 BE byte-order marks are
   handled; falls back to Latin-1 for legacy Windows rippers.
 - Permissive parsing — malformed timestamps, unknown tokens and misplaced
-  commands never throw; valid data is preserved.
+  commands never throw; valid data is preserved. Opt in to
+  `parseCueSheetWithDiagnostics` for a line-numbered warning list.
 - Unmodifiable collections on parsed sheets — safe to share across isolates
   and cache layers without defensive copies.
 - Structural `==` / `hashCode` / `toString` on `CueSheet`, `CueFile` and
@@ -73,6 +74,16 @@ Future<void> main() async {
 ```dart
 final sheet = parseCueSheet(cueText);
 final sheet2 = parseCueBytes(Uint8List.fromList(utf8.encode(cueText)));
+```
+
+### Surface diagnostics
+
+```dart
+final result = parseCueSheetWithDiagnostics(cueText);
+for (final issue in result.issues) {
+  print(issue); // WARNING: line 3: unknown TRACK type "WEIRD" (defaulting to AUDIO)
+}
+// result.sheet is still populated — the parser stays permissive.
 ```
 
 ### Round-trip

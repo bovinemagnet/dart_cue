@@ -199,58 +199,15 @@ Future<void> _cmdValidate(List<String> args) async {
   final parsed = _parseFileAndOpts(args, {});
   final sheet = await _loadOrDie(parsed.path);
 
-  final issues = validateSheet(sheet);
+  final issues = validateCueSheet(sheet);
   if (issues.isEmpty) {
     print('${parsed.path}: OK');
     exit(0);
   }
   for (final issue in issues) {
-    stderr.writeln('${parsed.path}: $issue');
+    stderr.writeln('${parsed.path}: ${issue.message}');
   }
   exit(1);
-}
-
-/// Structural validation. Returns a list of human-readable issue strings;
-/// an empty list means the sheet looks well-formed. Exposed for testing.
-List<String> validateSheet(CueSheet sheet) {
-  final issues = <String>[];
-
-  if (sheet.files.isEmpty) {
-    issues.add('no FILE entries');
-  }
-
-  if (sheet.catalog != null && !RegExp(r'^\d{13}$').hasMatch(sheet.catalog!)) {
-    issues.add('CATALOG "${sheet.catalog}" is not 13 digits');
-  }
-
-  int? previousTrackNumber;
-  for (final file in sheet.files) {
-    if (file.filename.isEmpty) {
-      issues.add('FILE entry has empty filename');
-    }
-    if (file.tracks.isEmpty) {
-      issues.add('FILE "${file.filename}" has no tracks');
-    }
-    for (final t in file.tracks) {
-      final where = 'TRACK ${t.trackNumber.toString().padLeft(2, '0')}';
-      if (t.trackNumber < 1 || t.trackNumber > 99) {
-        issues.add('$where: track number out of range (1-99)');
-      }
-      if (previousTrackNumber != null && t.trackNumber <= previousTrackNumber) {
-        issues.add('$where: track number does not increase monotonically');
-      }
-      previousTrackNumber = t.trackNumber;
-
-      if (!t.indices.containsKey(1)) {
-        issues.add('$where: missing INDEX 01');
-      }
-      if (t.isrc != null &&
-          !RegExp(r'^[A-Z]{2}[A-Z0-9]{3}\d{7}$').hasMatch(t.isrc!)) {
-        issues.add('$where: ISRC "${t.isrc}" is malformed');
-      }
-    }
-  }
-  return issues;
 }
 
 // ---------------------------------------------------------------------------

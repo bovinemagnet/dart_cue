@@ -7,8 +7,10 @@ import 'dart:io';
 import 'package:dart_cue/dart_cue.dart';
 import 'package:test/test.dart';
 
-// The validator is defined in bin/cueinfo.dart; import it directly.
-import '../bin/cueinfo.dart' show validateSheet;
+// `validateCueSheet` now lives in the library; alias it so the existing
+// tests keep reading like they did when it was defined in the CLI.
+List<String> validateSheet(CueSheet sheet) =>
+    validateCueSheet(sheet).map((i) => i.message).toList();
 
 const _goodCue = '''
 CATALOG 1234567890123
