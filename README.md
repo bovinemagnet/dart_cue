@@ -33,12 +33,15 @@ web.
 - Structural `==` / `hashCode` / `toString` on `CueSheet`, `CueFile` and
   `CueTrack` — parsed sheets can be compared, put in `Set`s, or keyed in
   `Map`s by their content.
+- ReplayGain helpers: `replayGainAlbumGain` / `replayGainAlbumPeak` on
+  `CueSheet` and `replayGainTrackGain` / `replayGainTrackPeak` on
+  `CueTrack` parse the standard `REM REPLAYGAIN_*` fields to `double`.
 
 ## Install
 
 ```yaml
 dependencies:
-  dart_cue: ^0.0.2
+  dart_cue: ^0.0.3
 ```
 
 ## Usage

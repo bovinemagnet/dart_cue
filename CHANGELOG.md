@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.3
+
+- `CueSheet.replayGainAlbumGain` / `replayGainAlbumPeak` and
+  `CueTrack.replayGainTrackGain` / `replayGainTrackPeak` convenience
+  getters. Strip an optional ` dB` suffix (case-insensitive) from the gain
+  values and return `double?`. Closes #5.
+
 ## 0.0.2
 
 - `CueSheet`, `CueFile` and `CueTrack` now have structural `==`, `hashCode`

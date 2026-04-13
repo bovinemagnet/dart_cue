@@ -33,6 +33,25 @@ int _mapHash<K, V>(Map<K, V> m) =>
     Object.hashAllUnordered(m.entries.map((e) => Object.hash(e.key, e.value)));
 int _setHash<T>(Set<T> s) => Object.hashAllUnordered(s);
 
+// ---------------------------------------------------------------------------
+// ReplayGain parsing
+// ---------------------------------------------------------------------------
+
+/// Strip a trailing ` dB` suffix (case-insensitive, optional space) and
+/// parse the remainder as a double. Returns `null` for `null` input or an
+/// unparseable value.
+double? _parseGain(String? value) {
+  if (value == null) return null;
+  final trimmed = value.trim();
+  final match =
+      RegExp(r'^(.*?)(\s*dB)?$', caseSensitive: false).firstMatch(trimmed);
+  final numericPart = (match?.group(1) ?? trimmed).trim();
+  return double.tryParse(numericPart);
+}
+
+double? _parsePeak(String? value) =>
+    value == null ? null : double.tryParse(value.trim());
+
 /// File type declared in a FILE command.
 enum CueFileType {
   wave,
@@ -230,6 +249,18 @@ class CueTrack {
   /// after all tracks have been parsed.
   Duration? endTime;
 
+  /// ReplayGain track gain in decibels, parsed from
+  /// `REM REPLAYGAIN_TRACK_GAIN`. Returns `null` when absent or
+  /// unparseable.
+  double? get replayGainTrackGain =>
+      _parseGain(remComments['REPLAYGAIN_TRACK_GAIN']);
+
+  /// ReplayGain track peak sample value, parsed from
+  /// `REM REPLAYGAIN_TRACK_PEAK`. Returns `null` when absent or
+  /// unparseable.
+  double? get replayGainTrackPeak =>
+      _parsePeak(remComments['REPLAYGAIN_TRACK_PEAK']);
+
   /// Duration of this track (`endTime - startTime`), or `null` if either is
   /// unavailable.
   Duration? get duration {
@@ -382,6 +413,18 @@ class CueSheet {
   /// specifically need the spec-defined `CATALOG` value.
   String? get barcode =>
       catalog ?? remComments['UPC'] ?? remComments['BARCODE'];
+
+  /// ReplayGain album gain in decibels, parsed from
+  /// `REM REPLAYGAIN_ALBUM_GAIN`. Returns `null` when absent or
+  /// unparseable.
+  double? get replayGainAlbumGain =>
+      _parseGain(remComments['REPLAYGAIN_ALBUM_GAIN']);
+
+  /// ReplayGain album peak sample value, parsed from
+  /// `REM REPLAYGAIN_ALBUM_PEAK`. Returns `null` when absent or
+  /// unparseable.
+  double? get replayGainAlbumPeak =>
+      _parsePeak(remComments['REPLAYGAIN_ALBUM_PEAK']);
 
   CueSheet({
     this.performer,
