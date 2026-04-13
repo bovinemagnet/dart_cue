@@ -331,6 +331,65 @@ FILE "a.wav" WAVE
       expect(parseCueSheet(cue)!.discNumber, 2);
     });
 
+    test('barcode falls back from CATALOG to REM UPC to REM BARCODE', () {
+      const catalogOnly = '''
+CATALOG 0724384974923
+FILE "a.wav" WAVE
+  TRACK 01 AUDIO
+    INDEX 01 00:00:00
+''';
+      expect(parseCueSheet(catalogOnly)!.barcode, '0724384974923');
+
+      const upcOnly = '''
+REM UPC 0724384974923
+FILE "a.wav" WAVE
+  TRACK 01 AUDIO
+    INDEX 01 00:00:00
+''';
+      expect(parseCueSheet(upcOnly)!.barcode, '0724384974923');
+
+      const barcodeOnly = '''
+REM BARCODE 0724384974923
+FILE "a.wav" WAVE
+  TRACK 01 AUDIO
+    INDEX 01 00:00:00
+''';
+      expect(parseCueSheet(barcodeOnly)!.barcode, '0724384974923');
+    });
+
+    test('CATALOG takes precedence over REM UPC', () {
+      const cue = '''
+CATALOG 1111111111111
+REM UPC 2222222222222
+REM BARCODE 3333333333333
+FILE "a.wav" WAVE
+  TRACK 01 AUDIO
+    INDEX 01 00:00:00
+''';
+      expect(parseCueSheet(cue)!.barcode, '1111111111111');
+    });
+
+    test('REM UPC takes precedence over REM BARCODE', () {
+      const cue = '''
+REM UPC 2222222222222
+REM BARCODE 3333333333333
+FILE "a.wav" WAVE
+  TRACK 01 AUDIO
+    INDEX 01 00:00:00
+''';
+      expect(parseCueSheet(cue)!.barcode, '2222222222222');
+    });
+
+    test('barcode picks up lower-case REM upc (keys uppercased)', () {
+      const cue = '''
+REM upc 0724384974923
+FILE "a.wav" WAVE
+  TRACK 01 AUDIO
+    INDEX 01 00:00:00
+''';
+      expect(parseCueSheet(cue)!.barcode, '0724384974923');
+    });
+
     test('missing REM fields → null getters', () {
       const cue = 'FILE "a.wav" WAVE\n  TRACK 01 AUDIO\n    INDEX 01 00:00:00\n';
       final sheet = parseCueSheet(cue)!;
@@ -338,6 +397,7 @@ FILE "a.wav" WAVE
       expect(sheet.date, isNull);
       expect(sheet.discId, isNull);
       expect(sheet.discNumber, isNull);
+      expect(sheet.barcode, isNull);
     });
   });
 

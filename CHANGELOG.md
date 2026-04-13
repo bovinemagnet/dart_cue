@@ -13,6 +13,9 @@ Initial release.
 - Album-level metadata: `CATALOG`, `CDTEXTFILE`, `PERFORMER`, `SONGWRITER`,
   `TITLE`, arbitrary and well-known `REM` fields (`GENRE`, `DATE`/`YEAR`,
   `DISCNUMBER`, `DISCID`, `COMMENT`, …).
+- `CueSheet.barcode` convenience getter that falls back through `CATALOG` →
+  `REM UPC` → `REM BARCODE` for callers that just want the disc barcode
+  regardless of which command the ripper used (#2).
 - File types: `WAVE`, `MP3`, `AIFF`, `AIFC`, `BINARY`, `MOTOROLA`.
 - Track types: `AUDIO`, `CDG`, `MODE1/2048`, `MODE1/2352`, `MODE2/2336`,
   `MODE2/2352`, `CDI/2336`, `CDI/2352`, `DATA`.

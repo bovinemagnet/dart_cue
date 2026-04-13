@@ -280,6 +280,17 @@ class CueSheet {
   /// Disc ID from `REM DISCID`.
   String? get discId => remComments['DISCID'];
 
+  /// Disc barcode from [catalog], `REM UPC`, or `REM BARCODE`, in that
+  /// priority order. Returns `null` if none are present.
+  ///
+  /// Use this when you want the barcode regardless of which command the
+  /// ripper used to emit it — many real-world tools (foobar2000, some
+  /// dBpoweramp and EAC plugins) put the UPC/EAN-13 barcode in a `REM`
+  /// field instead of `CATALOG`. Use [catalog] directly if you
+  /// specifically need the spec-defined `CATALOG` value.
+  String? get barcode =>
+      catalog ?? remComments['UPC'] ?? remComments['BARCODE'];
+
   CueSheet({
     this.performer,
     this.title,
