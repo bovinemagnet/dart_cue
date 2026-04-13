@@ -4,8 +4,11 @@ A pure Dart [CUE sheet] parser and serialiser. Reads album, track and index
 metadata into a well-typed model, writes it back losslessly, and tolerates the
 quirks of real-world CUE files produced by EAC, cdrdao, XLD and friends.
 
-No runtime dependencies. Works on the Dart VM, AOT binaries, Flutter and the
-web.
+No runtime dependencies. Works on the Dart VM, AOT binaries, Flutter
+(mobile, desktop, web) and plain Dart web.
+
+> On the web, `parseCueFile` is not available (there is no filesystem) —
+> fetch the file bytes yourself and call `parseCueBytes`.
 
 [CUE sheet]: https://en.wikipedia.org/wiki/Cue_sheet_(computing)
 
@@ -41,7 +44,7 @@ web.
 
 ```yaml
 dependencies:
-  dart_cue: ^0.0.4
+  dart_cue: ^0.0.5
 ```
 
 ## Usage

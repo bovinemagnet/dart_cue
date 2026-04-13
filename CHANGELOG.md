@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.5
+
+- Web platform support. `parseCueSheet`, `parseCueBytes`, `toCueString`
+  and every model class now compile to JS and run in the browser.
+  Filesystem access via `parseCueFile` is behind conditional imports —
+  available on the Dart VM and Flutter (mobile, desktop) as before; on
+  the web it throws `UnsupportedError` with a clear message pointing
+  callers at `parseCueBytes`. Closes #6.
+
 ## 0.0.4
 
 - Fix pub.dev scoring: escape angle brackets in `bin/cueinfo.dart` doc
