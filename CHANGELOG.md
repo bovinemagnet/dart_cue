@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.2
+
+- `CueSheet`, `CueFile` and `CueTrack` now have structural `==`, `hashCode`
+  and `toString` implementations, so parsed sheets can be compared, put in
+  `Set`s, or keyed in `Map`s by their content. Equality covers every
+  constructor field plus the mutable `CueTrack.endTime`. Closes #3.
+
 ## 0.0.1
 
 Initial release.

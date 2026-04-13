@@ -1,6 +1,38 @@
 /// Data models for CUE sheet parsing.
 library;
 
+// ---------------------------------------------------------------------------
+// Internal deep-equality helpers
+// ---------------------------------------------------------------------------
+
+bool _listEq<T>(List<T> a, List<T> b) {
+  if (identical(a, b)) return true;
+  if (a.length != b.length) return false;
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
+}
+
+bool _mapEq<K, V>(Map<K, V> a, Map<K, V> b) {
+  if (identical(a, b)) return true;
+  if (a.length != b.length) return false;
+  for (final entry in a.entries) {
+    if (!b.containsKey(entry.key) || b[entry.key] != entry.value) return false;
+  }
+  return true;
+}
+
+bool _setEq<T>(Set<T> a, Set<T> b) {
+  if (identical(a, b)) return true;
+  return a.length == b.length && a.containsAll(b);
+}
+
+int _listHash<T>(List<T> xs) => Object.hashAll(xs);
+int _mapHash<K, V>(Map<K, V> m) =>
+    Object.hashAllUnordered(m.entries.map((e) => Object.hash(e.key, e.value)));
+int _setHash<T>(Set<T> s) => Object.hashAllUnordered(s);
+
 /// File type declared in a FILE command.
 enum CueFileType {
   wave,
@@ -222,6 +254,50 @@ class CueTrack {
   })  : flags = flags ?? const {},
         indices = indices ?? const {},
         remComments = remComments ?? const {};
+
+  /// Structural equality across every field, including [endTime].
+  ///
+  /// Note: [endTime] is mutable (populated by [parseCueSheet] after all
+  /// tracks in a file are known). Mutating it after inserting a [CueTrack]
+  /// into a `Set` or `Map` invalidates the stored hash — the usual contract
+  /// for mutable-keyed collections applies.
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CueTrack &&
+          trackNumber == other.trackNumber &&
+          trackType == other.trackType &&
+          title == other.title &&
+          performer == other.performer &&
+          songwriter == other.songwriter &&
+          isrc == other.isrc &&
+          pregap == other.pregap &&
+          postgap == other.postgap &&
+          endTime == other.endTime &&
+          _setEq(flags, other.flags) &&
+          _mapEq(indices, other.indices) &&
+          _mapEq(remComments, other.remComments);
+
+  @override
+  int get hashCode => Object.hash(
+        trackNumber,
+        trackType,
+        title,
+        performer,
+        songwriter,
+        isrc,
+        pregap,
+        postgap,
+        endTime,
+        _setHash(flags),
+        _mapHash(indices),
+        _mapHash(remComments),
+      );
+
+  @override
+  String toString() =>
+      'CueTrack(#$trackNumber ${trackType.toLabel()}'
+      '${title == null ? '' : ' "$title"'})';
 }
 
 /// A FILE entry and its associated tracks.
@@ -240,6 +316,22 @@ class CueFile {
     required this.fileType,
     List<CueTrack>? tracks,
   }) : tracks = tracks ?? [];
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CueFile &&
+          filename == other.filename &&
+          fileType == other.fileType &&
+          _listEq(tracks, other.tracks);
+
+  @override
+  int get hashCode =>
+      Object.hash(filename, fileType, _listHash(tracks));
+
+  @override
+  String toString() =>
+      'CueFile("$filename" ${fileType.toLabel()}, ${tracks.length} tracks)';
 }
 
 /// The top-level CUE sheet.
@@ -301,4 +393,36 @@ class CueSheet {
     Map<String, String>? remComments,
   })  : files = files ?? [],
         remComments = remComments ?? {};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CueSheet &&
+          performer == other.performer &&
+          title == other.title &&
+          songwriter == other.songwriter &&
+          catalog == other.catalog &&
+          cdTextFile == other.cdTextFile &&
+          _listEq(files, other.files) &&
+          _mapEq(remComments, other.remComments);
+
+  @override
+  int get hashCode => Object.hash(
+        performer,
+        title,
+        songwriter,
+        catalog,
+        cdTextFile,
+        _listHash(files),
+        _mapHash(remComments),
+      );
+
+  @override
+  String toString() {
+    final trackCount =
+        files.fold<int>(0, (sum, f) => sum + f.tracks.length);
+    return 'CueSheet('
+        '${title == null ? '' : '"$title" '}'
+        '${files.length} files, $trackCount tracks)';
+  }
 }
