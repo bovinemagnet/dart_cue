@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+- GitHub Actions CI (`.github/workflows/ci.yml`): format check, analyser
+  with `--fatal-warnings`, test matrix (Ubuntu/macOS/Windows × Dart
+  stable & beta), web-compile smoke test, dartdoc dry-run and
+  `pub publish --dry-run`.
+- GitHub Actions release workflow (`.github/workflows/release.yml`):
+  on `v*` tag push, compiles the `cueinfo` binary for linux-x64,
+  macos-arm64 and windows-x64, packages it and attaches the artefacts
+  to the GitHub release.
+- `dart_test.yaml` documents the `cli` tag used by the subprocess
+  integration tests.
+
 ## 0.0.6
 
 - `copyWith` on `CueSheet`, `CueFile` and `CueTrack`. Returns a new

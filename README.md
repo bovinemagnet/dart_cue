@@ -1,5 +1,9 @@
 # dart_cue
 
+[![CI](https://github.com/bovinemagnet/dart_cue/actions/workflows/ci.yml/badge.svg)](https://github.com/bovinemagnet/dart_cue/actions/workflows/ci.yml)
+[![pub package](https://img.shields.io/pub/v/dart_cue.svg)](https://pub.dev/packages/dart_cue)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+
 A pure Dart [CUE sheet] parser and serialiser. Reads album, track and index
 metadata into a well-typed model, writes it back losslessly, and tolerates the
 quirks of real-world CUE files produced by EAC, cdrdao, XLD and friends.
