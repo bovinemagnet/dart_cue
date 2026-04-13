@@ -45,7 +45,7 @@ No runtime dependencies. Works on the Dart VM, AOT binaries, Flutter
 
 ```yaml
 dependencies:
-  dart_cue: ^0.0.5
+  dart_cue: ^0.0.6
 ```
 
 ## Usage
@@ -91,6 +91,25 @@ for (final issue in result.issues) {
 ```dart
 final sheet = parseCueSheet(input)!;
 final output = toCueString(sheet); // re-parseable, lossless
+```
+
+### Edit with `copyWith`
+
+```dart
+final louder = track.copyWith(
+  remComments: {...track.remComments, 'REPLAYGAIN_TRACK_GAIN': '0 dB'},
+);
+final renamed = sheet.copyWith(title: 'Director\'s Cut');
+```
+
+### JSON persistence
+
+```dart
+import 'dart:convert';
+
+final text = jsonEncode(sheet.toJson());
+final restored = CueSheet.fromJson(jsonDecode(text) as Map<String, Object?>);
+assert(restored == sheet); // lossless round-trip
 ```
 
 ### MSF timestamps

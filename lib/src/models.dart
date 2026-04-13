@@ -1,6 +1,8 @@
 /// Data models for CUE sheet parsing.
 library;
 
+import 'msf.dart';
+
 // ---------------------------------------------------------------------------
 // Internal deep-equality helpers
 // ---------------------------------------------------------------------------
@@ -328,7 +330,105 @@ class CueTrack {
   @override
   String toString() => 'CueTrack(#$trackNumber ${trackType.toLabel()}'
       '${title == null ? '' : ' "$title"'})';
+
+  /// Returns a copy of this track with the given fields replaced. Fields
+  /// left as `null` keep their current value (standard Dart `copyWith`
+  /// semantics — there is no way to clear a nullable field via this
+  /// method; construct directly for that).
+  CueTrack copyWith({
+    int? trackNumber,
+    CueTrackType? trackType,
+    String? title,
+    String? performer,
+    String? songwriter,
+    String? isrc,
+    Duration? pregap,
+    Duration? postgap,
+    Set<CueFlag>? flags,
+    Map<int, Duration>? indices,
+    Map<String, String>? remComments,
+    Duration? endTime,
+  }) {
+    final next = CueTrack(
+      trackNumber: trackNumber ?? this.trackNumber,
+      trackType: trackType ?? this.trackType,
+      title: title ?? this.title,
+      performer: performer ?? this.performer,
+      songwriter: songwriter ?? this.songwriter,
+      isrc: isrc ?? this.isrc,
+      pregap: pregap ?? this.pregap,
+      postgap: postgap ?? this.postgap,
+      flags: flags ?? this.flags,
+      indices: indices ?? this.indices,
+      remComments: remComments ?? this.remComments,
+    );
+    next.endTime = endTime ?? this.endTime;
+    return next;
+  }
+
+  /// Serialise this track to a JSON-compatible map.
+  ///
+  /// Optional fields are omitted when null. MSF durations are written as
+  /// `mm:ss:ff` strings, enums as their CUE labels, and `indices` keys
+  /// are stringified so the map is JSON-safe.
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      'trackNumber': trackNumber,
+      'trackType': trackType.toLabel(),
+      if (title != null) 'title': title,
+      if (performer != null) 'performer': performer,
+      if (songwriter != null) 'songwriter': songwriter,
+      if (isrc != null) 'isrc': isrc,
+      if (pregap != null) 'pregap': formatMsf(pregap!),
+      if (postgap != null) 'postgap': formatMsf(postgap!),
+      if (flags.isNotEmpty) 'flags': flags.map((f) => f.toToken()).toList(),
+      if (indices.isNotEmpty)
+        'indices': {
+          for (final entry in indices.entries)
+            entry.key.toString(): formatMsf(entry.value),
+        },
+      if (remComments.isNotEmpty) 'remComments': Map.of(remComments),
+      if (endTime != null) 'endTime': formatMsf(endTime!),
+    };
+  }
+
+  /// Rehydrate a [CueTrack] from the map produced by [toJson].
+  static CueTrack fromJson(Map<String, Object?> json) {
+    final indicesRaw = json['indices'] as Map<String, Object?>?;
+    final flagsRaw = json['flags'] as List<Object?>?;
+    final remRaw = json['remComments'] as Map<String, Object?>?;
+    final track = CueTrack(
+      trackNumber: json['trackNumber']! as int,
+      trackType: CueTrackType.fromString(json['trackType']! as String),
+      title: json['title'] as String?,
+      performer: json['performer'] as String?,
+      songwriter: json['songwriter'] as String?,
+      isrc: json['isrc'] as String?,
+      pregap: _parseMsfOrNull(json['pregap'] as String?),
+      postgap: _parseMsfOrNull(json['postgap'] as String?),
+      flags: flagsRaw == null
+          ? const {}
+          : {
+              for (final token in flagsRaw)
+                if (CueFlag.fromToken(token! as String) case final flag?) flag,
+            },
+      indices: indicesRaw == null
+          ? const {}
+          : {
+              for (final entry in indicesRaw.entries)
+                int.parse(entry.key):
+                    parseMsf(entry.value! as String) ?? Duration.zero,
+            },
+      remComments: remRaw == null
+          ? const {}
+          : {for (final e in remRaw.entries) e.key: e.value! as String},
+    );
+    track.endTime = _parseMsfOrNull(json['endTime'] as String?);
+    return track;
+  }
 }
+
+Duration? _parseMsfOrNull(String? s) => s == null ? null : parseMsf(s);
 
 /// A FILE entry and its associated tracks.
 class CueFile {
@@ -361,6 +461,41 @@ class CueFile {
   @override
   String toString() =>
       'CueFile("$filename" ${fileType.toLabel()}, ${tracks.length} tracks)';
+
+  /// Returns a copy with any given field replaced. Omitted fields keep
+  /// their current value.
+  CueFile copyWith({
+    String? filename,
+    CueFileType? fileType,
+    List<CueTrack>? tracks,
+  }) =>
+      CueFile(
+        filename: filename ?? this.filename,
+        fileType: fileType ?? this.fileType,
+        tracks: tracks ?? this.tracks,
+      );
+
+  /// Serialise to a JSON-compatible map.
+  Map<String, Object?> toJson() => <String, Object?>{
+        'filename': filename,
+        'fileType': fileType.toLabel(),
+        'tracks': [for (final t in tracks) t.toJson()],
+      };
+
+  /// Rehydrate from the map produced by [toJson].
+  static CueFile fromJson(Map<String, Object?> json) {
+    final tracksRaw = json['tracks'] as List<Object?>?;
+    return CueFile(
+      filename: json['filename']! as String,
+      fileType: CueFileType.fromString(json['fileType']! as String),
+      tracks: tracksRaw == null
+          ? const []
+          : [
+              for (final t in tracksRaw)
+                CueTrack.fromJson(t! as Map<String, Object?>)
+            ],
+    );
+  }
 }
 
 /// The top-level CUE sheet.
@@ -464,5 +599,64 @@ class CueSheet {
     return 'CueSheet('
         '${title == null ? '' : '"$title" '}'
         '${files.length} files, $trackCount tracks)';
+  }
+
+  /// Returns a copy with any given field replaced. Omitted fields keep
+  /// their current value.
+  CueSheet copyWith({
+    String? performer,
+    String? title,
+    String? songwriter,
+    String? catalog,
+    String? cdTextFile,
+    List<CueFile>? files,
+    Map<String, String>? remComments,
+  }) =>
+      CueSheet(
+        performer: performer ?? this.performer,
+        title: title ?? this.title,
+        songwriter: songwriter ?? this.songwriter,
+        catalog: catalog ?? this.catalog,
+        cdTextFile: cdTextFile ?? this.cdTextFile,
+        files: files ?? this.files,
+        remComments: remComments ?? this.remComments,
+      );
+
+  /// Serialise to a JSON-compatible map.
+  ///
+  /// Optional fields are omitted when null. MSF durations are written as
+  /// `mm:ss:ff` strings, enums as their CUE labels, and `indices` keys
+  /// stringified so the map is JSON-safe. Round-trips losslessly via
+  /// [CueSheet.fromJson].
+  Map<String, Object?> toJson() => <String, Object?>{
+        if (performer != null) 'performer': performer,
+        if (title != null) 'title': title,
+        if (songwriter != null) 'songwriter': songwriter,
+        if (catalog != null) 'catalog': catalog,
+        if (cdTextFile != null) 'cdTextFile': cdTextFile,
+        if (remComments.isNotEmpty) 'remComments': Map.of(remComments),
+        'files': [for (final f in files) f.toJson()],
+      };
+
+  /// Rehydrate from the map produced by [toJson].
+  static CueSheet fromJson(Map<String, Object?> json) {
+    final filesRaw = json['files'] as List<Object?>?;
+    final remRaw = json['remComments'] as Map<String, Object?>?;
+    return CueSheet(
+      performer: json['performer'] as String?,
+      title: json['title'] as String?,
+      songwriter: json['songwriter'] as String?,
+      catalog: json['catalog'] as String?,
+      cdTextFile: json['cdTextFile'] as String?,
+      files: filesRaw == null
+          ? const []
+          : [
+              for (final f in filesRaw)
+                CueFile.fromJson(f! as Map<String, Object?>)
+            ],
+      remComments: remRaw == null
+          ? const {}
+          : {for (final e in remRaw.entries) e.key: e.value! as String},
+    );
   }
 }

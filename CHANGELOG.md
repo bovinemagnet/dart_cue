@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.0.6
+
+- `copyWith` on `CueSheet`, `CueFile` and `CueTrack`. Returns a new
+  instance with any named argument replaced; omitted fields keep their
+  current value. `CueTrack.copyWith` carries `endTime` through and
+  accepts a replacement for it.
+- JSON serialisation: `toJson()` and static `fromJson(Map<String,
+  Object?>)` on all three model classes. MSF durations are written as
+  `mm:ss:ff` strings; enums as CUE labels; optional fields omitted when
+  null. Round-trips losslessly — `CueSheet.fromJson(sheet.toJson())`
+  equals `sheet`. Closes #7.
+
 ## 0.0.5
 
 - Web platform support. `parseCueSheet`, `parseCueBytes`, `toCueString`
