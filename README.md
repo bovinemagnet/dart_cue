@@ -30,12 +30,15 @@ web.
   commands never throw; valid data is preserved.
 - Unmodifiable collections on parsed sheets — safe to share across isolates
   and cache layers without defensive copies.
+- Structural `==` / `hashCode` / `toString` on `CueSheet`, `CueFile` and
+  `CueTrack` — parsed sheets can be compared, put in `Set`s, or keyed in
+  `Map`s by their content.
 
 ## Install
 
 ```yaml
 dependencies:
-  dart_cue: ^0.0.1
+  dart_cue: ^0.0.2
 ```
 
 ## Usage
