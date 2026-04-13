@@ -1,0 +1,31 @@
+REM GENRE "Alternative Rock"
+REM DATE 1997
+REM DISCID A20B3C04
+REM COMMENT "ExactAudioCopy v1.3"
+CATALOG 0724384974923
+PERFORMER "Fictional Band"
+TITLE "Imaginary Album"
+FILE "Fictional Band - Imaginary Album.wav" WAVE
+  TRACK 01 AUDIO
+    TITLE "Opening"
+    PERFORMER "Fictional Band"
+    ISRC GBABC9700001
+    INDEX 01 00:00:00
+  TRACK 02 AUDIO
+    TITLE "Second Chance"
+    PERFORMER "Fictional Band"
+    ISRC GBABC9700002
+    INDEX 00 03:58:15
+    INDEX 01 04:00:00
+  TRACK 03 AUDIO
+    TITLE "Middle Eight"
+    PERFORMER "Fictional Band"
+    ISRC GBABC9700003
+    INDEX 00 07:22:40
+    INDEX 01 07:25:00
+  TRACK 04 AUDIO
+    TITLE "Closer"
+    PERFORMER "Fictional Band"
+    ISRC GBABC9700004
+    INDEX 00 11:10:12
+    INDEX 01 11:12:00

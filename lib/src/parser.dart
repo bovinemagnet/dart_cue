@@ -52,6 +52,7 @@ class _TrackBuilder {
   Duration? postgap;
   final Set<CueFlag> flags = {};
   final Map<int, Duration> indices = {};
+  final Map<String, String> remComments = {};
 
   _TrackBuilder(this.trackNumber, this.trackType);
 
@@ -66,6 +67,7 @@ class _TrackBuilder {
         postgap: postgap,
         flags: Set.unmodifiable(flags),
         indices: Map.unmodifiable(indices),
+        remComments: Map.unmodifiable(remComments),
       );
 }
 
@@ -244,7 +246,11 @@ class _Parser {
     if (m != null) {
       final key = m.group(1)!.toUpperCase();
       final val = m.group(2)?.trim() ?? '';
-      _remComments[key] = _unquote(val);
+      if (_currentTrack != null) {
+        _currentTrack!.remComments[key] = _unquote(val);
+      } else {
+        _remComments[key] = _unquote(val);
+      }
       return;
     }
   }

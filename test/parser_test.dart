@@ -250,6 +250,97 @@ file "a.wav" wave
     });
   });
 
+  group('parseCueSheet — spec coverage additions', () {
+    test('AIFC file type', () {
+      final cue = 'FILE "a.aifc" AIFC\n  TRACK 01 AUDIO\n    INDEX 01 00:00:00\n';
+      expect(parseCueSheet(cue)!.files[0].fileType, CueFileType.aifc);
+    });
+
+    test('DATA track type', () {
+      final cue = 'FILE "a.bin" BINARY\n  TRACK 01 DATA\n    INDEX 01 00:00:00\n';
+      expect(parseCueSheet(cue)!.files[0].tracks[0].trackType, CueTrackType.data);
+    });
+
+    test('FLAGS DATA', () {
+      final cue = 'FILE "a.wav" WAVE\n  TRACK 01 AUDIO\n    FLAGS DATA\n    INDEX 01 00:00:00\n';
+      expect(parseCueSheet(cue)!.files[0].tracks[0].flags, contains(CueFlag.data));
+    });
+
+    test('track-level REM stored on track, not album', () {
+      const cue = '''
+REM GENRE Rock
+FILE "a.wav" WAVE
+  TRACK 01 AUDIO
+    TITLE "One"
+    REM REPLAYGAIN_TRACK_GAIN -6.12 dB
+    INDEX 01 00:00:00
+  TRACK 02 AUDIO
+    TITLE "Two"
+    REM REPLAYGAIN_TRACK_GAIN -5.43 dB
+    INDEX 01 03:00:00
+''';
+      final sheet = parseCueSheet(cue)!;
+      final t1 = sheet.files[0].tracks[0];
+      final t2 = sheet.files[0].tracks[1];
+      expect(sheet.remComments['GENRE'], 'Rock');
+      expect(sheet.remComments.containsKey('REPLAYGAIN_TRACK_GAIN'), isFalse);
+      expect(t1.remComments['REPLAYGAIN_TRACK_GAIN'], '-6.12 dB');
+      expect(t2.remComments['REPLAYGAIN_TRACK_GAIN'], '-5.43 dB');
+    });
+  });
+
+  group('parseCueSheet — convenience getters', () {
+    test('date falls back from DATE to YEAR when DATE absent', () {
+      const cue = '''
+REM YEAR 1999
+FILE "a.wav" WAVE
+  TRACK 01 AUDIO
+    INDEX 01 00:00:00
+''';
+      expect(parseCueSheet(cue)!.date, '1999');
+    });
+
+    test('DATE takes precedence over YEAR when both present', () {
+      const cue = '''
+REM YEAR 1999
+REM DATE 2024
+FILE "a.wav" WAVE
+  TRACK 01 AUDIO
+    INDEX 01 00:00:00
+''';
+      expect(parseCueSheet(cue)!.date, '2024');
+    });
+
+    test('non-numeric DISCNUMBER returns null', () {
+      const cue = '''
+REM DISCNUMBER onehundred
+FILE "a.wav" WAVE
+  TRACK 01 AUDIO
+    INDEX 01 00:00:00
+''';
+      expect(parseCueSheet(cue)!.discNumber, isNull);
+    });
+
+    test('valid DISCNUMBER parses to int', () {
+      const cue = '''
+REM DISCNUMBER 2
+FILE "a.wav" WAVE
+  TRACK 01 AUDIO
+    INDEX 01 00:00:00
+''';
+      expect(parseCueSheet(cue)!.discNumber, 2);
+    });
+
+    test('missing REM fields → null getters', () {
+      const cue = 'FILE "a.wav" WAVE\n  TRACK 01 AUDIO\n    INDEX 01 00:00:00\n';
+      final sheet = parseCueSheet(cue)!;
+      expect(sheet.genre, isNull);
+      expect(sheet.date, isNull);
+      expect(sheet.discId, isNull);
+      expect(sheet.discNumber, isNull);
+    });
+  });
+
   group('parseCueSheet — error tolerance', () {
     test('missing PERFORMER → null, no crash', () {
       final sheet = parseCueSheet(_minimalCue)!;

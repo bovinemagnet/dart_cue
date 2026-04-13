@@ -39,6 +39,9 @@ String toCueString(CueSheet sheet) {
         writeLine('    SONGWRITER ${q(track.songwriter!)}');
       }
       if (track.isrc != null) writeLine('    ISRC ${track.isrc}');
+      for (final entry in track.remComments.entries) {
+        writeLine('    REM ${entry.key} ${entry.value}');
+      }
       if (track.flags.isNotEmpty) {
         writeLine(
             '    FLAGS ${track.flags.map((f) => f.toToken()).join(' ')}');

@@ -1,10 +1,12 @@
 /// Data models for CUE sheet parsing.
+library;
 
 /// File type declared in a FILE command.
 enum CueFileType {
   wave,
   mp3,
   aiff,
+  aifc,
   binary,
   motorola;
 
@@ -18,6 +20,8 @@ enum CueFileType {
         return CueFileType.mp3;
       case 'AIFF':
         return CueFileType.aiff;
+      case 'AIFC':
+        return CueFileType.aifc;
       case 'BINARY':
         return CueFileType.binary;
       case 'MOTOROLA':
@@ -40,7 +44,8 @@ enum CueTrackType {
   mode2_2336,
   mode2_2352,
   cdi_2336,
-  cdi_2352;
+  cdi_2352,
+  data;
 
   /// Parse a track-type string (case-insensitive) to [CueTrackType].
   /// Returns [CueTrackType.audio] for unrecognised values.
@@ -62,6 +67,8 @@ enum CueTrackType {
         return CueTrackType.cdi_2336;
       case 'CDI/2352':
         return CueTrackType.cdi_2352;
+      case 'DATA':
+        return CueTrackType.data;
       default:
         return CueTrackType.audio;
     }
@@ -86,6 +93,8 @@ enum CueTrackType {
         return 'CDI/2336';
       case CueTrackType.cdi_2352:
         return 'CDI/2352';
+      case CueTrackType.data:
+        return 'DATA';
     }
   }
 }
@@ -102,7 +111,10 @@ enum CueFlag {
   preEmphasis,
 
   /// Serial copy management system.
-  scms;
+  scms,
+
+  /// Data track.
+  data;
 
   /// Parse a flag token (case-insensitive) to [CueFlag].
   /// Returns `null` for unrecognised tokens.
@@ -116,6 +128,8 @@ enum CueFlag {
         return CueFlag.preEmphasis;
       case 'SCMS':
         return CueFlag.scms;
+      case 'DATA':
+        return CueFlag.data;
       default:
         return null;
     }
@@ -132,6 +146,8 @@ enum CueFlag {
         return 'PRE';
       case CueFlag.scms:
         return 'SCMS';
+      case CueFlag.data:
+        return 'DATA';
     }
   }
 }
@@ -171,6 +187,10 @@ class CueTrack {
   /// [Duration]s.
   final Map<int, Duration> indices;
 
+  /// Track-scoped REM key→value pairs (keys stored in uppercase). Common
+  /// examples are `REPLAYGAIN_TRACK_GAIN` and `REPLAYGAIN_TRACK_PEAK`.
+  final Map<String, String> remComments;
+
   /// Start time of this track (INDEX 01).
   Duration? get startTime => indices[1];
 
@@ -198,8 +218,10 @@ class CueTrack {
     this.postgap,
     Set<CueFlag>? flags,
     Map<int, Duration>? indices,
+    Map<String, String>? remComments,
   })  : flags = flags ?? const {},
-        indices = indices ?? const {};
+        indices = indices ?? const {},
+        remComments = remComments ?? const {};
 }
 
 /// A FILE entry and its associated tracks.

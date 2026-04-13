@@ -2,6 +2,7 @@
 ///
 /// CUE sheets use the MSF format `mm:ss:ff` where `ff` is a frame count at
 /// 75 frames per second.
+library;
 
 const int _framesPerSecond = 75;
 
@@ -24,13 +25,17 @@ Duration? parseMsf(String msf) {
 
 /// Format a [Duration] as an MSF string (`mm:ss:ff`).
 ///
-/// Frames are rounded down from the sub-second millisecond value.
+/// Rounds to the nearest 1/75 s frame so that
+/// `parseMsf(formatMsf(parseMsf(x))) == parseMsf(x)` for any valid MSF
+/// string `x` — the integer-division in [parseMsf] would otherwise be
+/// compounded by truncation here and drift by a frame.
 String formatMsf(Duration duration) {
   final totalMs = duration.inMilliseconds.abs();
-  final mm = totalMs ~/ (60 * 1000);
-  final ss = (totalMs % (60 * 1000)) ~/ 1000;
-  final ms = totalMs % 1000;
-  final ff = ms * _framesPerSecond ~/ 1000;
+  final totalFrames = (totalMs * _framesPerSecond + 500) ~/ 1000;
+  final ff = totalFrames % _framesPerSecond;
+  final totalSeconds = totalFrames ~/ _framesPerSecond;
+  final ss = totalSeconds % 60;
+  final mm = totalSeconds ~/ 60;
   return '${mm.toString().padLeft(2, '0')}:'
       '${ss.toString().padLeft(2, '0')}:'
       '${ff.toString().padLeft(2, '0')}';

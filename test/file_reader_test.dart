@@ -63,6 +63,40 @@ FILE "album.wav" WAVE
       expect(sheet!.title, 'Bytes Album');
     });
 
+    test('strips UTF-8 BOM', () {
+      const content = 'TITLE "BOM Album"\nFILE "a.wav" WAVE\n  TRACK 01 AUDIO\n    INDEX 01 00:00:00\n';
+      final bytes = Uint8List.fromList(<int>[0xEF, 0xBB, 0xBF, ...utf8.encode(content)]);
+      final sheet = parseCueBytes(bytes);
+      expect(sheet, isNotNull);
+      expect(sheet!.title, 'BOM Album');
+    });
+
+    test('decodes UTF-16 LE with BOM', () {
+      const content = 'TITLE "UTF16 LE"\nFILE "a.wav" WAVE\n  TRACK 01 AUDIO\n    INDEX 01 00:00:00\n';
+      final body = <int>[];
+      for (final code in content.codeUnits) {
+        body.add(code & 0xFF);
+        body.add((code >> 8) & 0xFF);
+      }
+      final bytes = Uint8List.fromList(<int>[0xFF, 0xFE, ...body]);
+      final sheet = parseCueBytes(bytes);
+      expect(sheet, isNotNull);
+      expect(sheet!.title, 'UTF16 LE');
+    });
+
+    test('decodes UTF-16 BE with BOM', () {
+      const content = 'TITLE "UTF16 BE"\nFILE "a.wav" WAVE\n  TRACK 01 AUDIO\n    INDEX 01 00:00:00\n';
+      final body = <int>[];
+      for (final code in content.codeUnits) {
+        body.add((code >> 8) & 0xFF);
+        body.add(code & 0xFF);
+      }
+      final bytes = Uint8List.fromList(<int>[0xFE, 0xFF, ...body]);
+      final sheet = parseCueBytes(bytes);
+      expect(sheet, isNotNull);
+      expect(sheet!.title, 'UTF16 BE');
+    });
+
     test('falls back to Latin-1 on invalid UTF-8', () {
       // 0xFF is not valid UTF-8.
       final bytes = Uint8List.fromList(

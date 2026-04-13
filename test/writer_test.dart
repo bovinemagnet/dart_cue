@@ -117,5 +117,83 @@ void main() {
       final reparsed = parseCueSheet(toCueString(original))!;
       expect(reparsed.genre, original.genre);
     });
+
+    test('AIFC file type round-trips', () {
+      final cue = 'FILE "a.aifc" AIFC\n  TRACK 01 AUDIO\n    INDEX 01 00:00:00\n';
+      final original = parseCueSheet(cue)!;
+      final reparsed = parseCueSheet(toCueString(original))!;
+      expect(reparsed.files[0].fileType, CueFileType.aifc);
+    });
+
+    test('DATA track type and FLAGS DATA round-trip', () {
+      final cue = 'FILE "a.bin" BINARY\n  TRACK 01 DATA\n    FLAGS DATA\n    INDEX 01 00:00:00\n';
+      final reparsed = parseCueSheet(toCueString(parseCueSheet(cue)!))!;
+      expect(reparsed.files[0].tracks[0].trackType, CueTrackType.data);
+      expect(reparsed.files[0].tracks[0].flags, contains(CueFlag.data));
+    });
+
+    test('hand-built CueSheet serialises and re-parses equivalently', () {
+      final original = CueSheet(
+        performer: 'Built Artist',
+        title: 'Built Album',
+        catalog: '1234567890123',
+        remComments: {'GENRE': 'Jazz', 'DATE': '2025'},
+        files: [
+          CueFile(
+            filename: 'built.wav',
+            fileType: CueFileType.wave,
+            tracks: [
+              CueTrack(
+                trackNumber: 1,
+                trackType: CueTrackType.audio,
+                title: 'First',
+                isrc: 'USABC1234567',
+                flags: {CueFlag.dcp, CueFlag.preEmphasis},
+                indices: {0: Duration.zero, 1: parseMsf('00:02:00')!},
+                remComments: {'REPLAYGAIN_TRACK_GAIN': '-5 dB'},
+              ),
+              CueTrack(
+                trackNumber: 2,
+                trackType: CueTrackType.audio,
+                title: 'Second',
+                indices: {1: parseMsf('03:30:00')!},
+              ),
+            ],
+          ),
+        ],
+      );
+      final reparsed = parseCueSheet(toCueString(original))!;
+      expect(reparsed.title, 'Built Album');
+      expect(reparsed.performer, 'Built Artist');
+      expect(reparsed.catalog, '1234567890123');
+      expect(reparsed.genre, 'Jazz');
+      expect(reparsed.files[0].tracks.length, 2);
+      expect(reparsed.files[0].tracks[0].title, 'First');
+      expect(reparsed.files[0].tracks[0].isrc, 'USABC1234567');
+      expect(reparsed.files[0].tracks[0].flags,
+          containsAll([CueFlag.dcp, CueFlag.preEmphasis]));
+      expect(reparsed.files[0].tracks[0].indices[0], Duration.zero);
+      expect(reparsed.files[0].tracks[0].remComments['REPLAYGAIN_TRACK_GAIN'],
+          '-5 dB');
+      expect(reparsed.files[0].tracks[1].title, 'Second');
+    });
+
+    test('track-level REM round-trip, separate from album REM', () {
+      const cue = '''
+REM GENRE Rock
+FILE "a.wav" WAVE
+  TRACK 01 AUDIO
+    TITLE "One"
+    REM REPLAYGAIN_TRACK_GAIN -6.12 dB
+    INDEX 01 00:00:00
+''';
+      final original = parseCueSheet(cue)!;
+      final serialised = toCueString(original);
+      final reparsed = parseCueSheet(serialised)!;
+      expect(reparsed.remComments['GENRE'], 'Rock');
+      expect(reparsed.files[0].tracks[0].remComments['REPLAYGAIN_TRACK_GAIN'],
+          '-6.12 dB');
+      expect(reparsed.remComments.containsKey('REPLAYGAIN_TRACK_GAIN'), isFalse);
+    });
   });
 }
