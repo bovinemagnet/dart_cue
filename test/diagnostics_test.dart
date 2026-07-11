@@ -188,6 +188,24 @@ FILE "a.wav" WAVE
           isTrue);
     });
 
+    test('out-of-range INDEX number flagged (hand-built)', () {
+      final sheet = CueSheet(files: [
+        CueFile(filename: 'a.wav', fileType: CueFileType.wave, tracks: [
+          CueTrack(
+            trackNumber: 1,
+            trackType: CueTrackType.audio,
+            indices: {1: Duration.zero, 100: const Duration(minutes: 1)},
+          ),
+        ]),
+      ]);
+      final issues = validateCueSheet(sheet);
+      expect(
+          issues.any((i) =>
+              i.message.contains('INDEX 100') &&
+              i.message.contains('out of range')),
+          isTrue);
+    });
+
     test('out-of-range track number flagged (hand-built)', () {
       final sheet = CueSheet(files: [
         CueFile(filename: 'a.wav', fileType: CueFileType.wave, tracks: [

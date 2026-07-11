@@ -158,5 +158,15 @@ void main() {
       });
       expect(f.tracks, isEmpty);
     });
+
+    test('CueTrack.fromJson throws on a malformed index timestamp', () {
+      expect(
+          () => CueTrack.fromJson({
+                'trackNumber': 1,
+                'trackType': 'AUDIO',
+                'indices': {'1': 'not-a-timestamp'},
+              }),
+          throwsFormatException);
+    });
   });
 }

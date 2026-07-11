@@ -39,14 +39,15 @@ int _setHash<T>(Set<T> s) => Object.hashAllUnordered(s);
 // ReplayGain parsing
 // ---------------------------------------------------------------------------
 
+final _reGainValue = RegExp(r'^(.*?)(\s*dB)?$', caseSensitive: false);
+
 /// Strip a trailing ` dB` suffix (case-insensitive, optional space) and
 /// parse the remainder as a double. Returns `null` for `null` input or an
 /// unparseable value.
 double? _parseGain(String? value) {
   if (value == null) return null;
   final trimmed = value.trim();
-  final match =
-      RegExp(r'^(.*?)(\s*dB)?$', caseSensitive: false).firstMatch(trimmed);
+  final match = _reGainValue.firstMatch(trimmed);
   final numericPart = (match?.group(1) ?? trimmed).trim();
   return double.tryParse(numericPart);
 }
@@ -394,6 +395,9 @@ class CueTrack {
   }
 
   /// Rehydrate a [CueTrack] from the map produced by [toJson].
+  ///
+  /// Throws a [FormatException] if an `indices` value is not a valid
+  /// `mm:ss:ff` MSF string.
   static CueTrack fromJson(Map<String, Object?> json) {
     final indicesRaw = json['indices'] as Map<String, Object?>?;
     final flagsRaw = json['flags'] as List<Object?>?;
@@ -417,8 +421,10 @@ class CueTrack {
           ? const {}
           : {
               for (final entry in indicesRaw.entries)
-                int.parse(entry.key):
-                    parseMsf(entry.value! as String) ?? Duration.zero,
+                int.parse(entry.key): parseMsf(entry.value! as String) ??
+                    (throw FormatException(
+                        'malformed MSF timestamp "${entry.value}" '
+                        'for INDEX ${entry.key}')),
             },
       remComments: remRaw == null
           ? const {}

@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.1.1
+
+- Parser normalisation: a quoted `CATALOG` value is unquoted, and `ISRC`
+  values are unquoted and upper-cased, so sheets from rippers that quote
+  or lower-case these no longer fail validation.
+- `validateCueSheet` also checks INDEX numbers are in range (0-99).
+- `CueTrack.fromJson` now throws a `FormatException` on a malformed
+  `indices` timestamp instead of silently substituting `00:00:00`.
+- `cueinfo` CLI: `--format` given without a value reports "missing value"
+  instead of "unknown option"; an invalid `--format` is rejected before
+  the file is read; bare `cueinfo` prints usage to stderr (exit 2) while
+  `-h`/`--help` keeps printing to stdout (exit 0).
+- `CueIssueSeverity.error` documented as reserved — the permissive parser
+  and `validateCueSheet` currently only emit warnings.
+
 ## 0.1.0
 
 - **Breaking:** `CueSheet`, `CueFile` and `CueTrack` constructors now

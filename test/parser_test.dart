@@ -447,4 +447,30 @@ FILE "a.wav" WAVE
       expect(() => parseCueSheet(cue), returnsNormally);
     });
   });
+
+  group('CATALOG and ISRC normalisation', () {
+    test('quoted CATALOG is unquoted', () {
+      const cue = '''
+CATALOG "1234567890123"
+FILE "a.wav" WAVE
+  TRACK 01 AUDIO
+    INDEX 01 00:00:00
+''';
+      final sheet = parseCueSheet(cue)!;
+      expect(sheet.catalog, '1234567890123');
+      expect(validateCueSheet(sheet), isEmpty);
+    });
+
+    test('ISRC is unquoted and upper-cased', () {
+      const cue = '''
+FILE "a.wav" WAVE
+  TRACK 01 AUDIO
+    ISRC "usabc1234567"
+    INDEX 01 00:00:00
+''';
+      final sheet = parseCueSheet(cue)!;
+      expect(sheet.files[0].tracks[0].isrc, 'USABC1234567');
+      expect(validateCueSheet(sheet), isEmpty);
+    });
+  });
 }

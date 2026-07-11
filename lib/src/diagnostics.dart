@@ -13,6 +13,9 @@ enum CueIssueSeverity {
   warning,
 
   /// Fatal: parsing could not recover meaningfully at this point.
+  ///
+  /// Reserved for future use — the permissive parser and
+  /// `validateCueSheet` currently only ever emit [warning].
   error,
 }
 

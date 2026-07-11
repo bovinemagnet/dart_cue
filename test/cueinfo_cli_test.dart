@@ -111,15 +111,28 @@ FILE "a.wav" WAVE
     Future<ProcessResult> run(List<String> args) =>
         Process.run('dart', ['run', 'bin/cueinfo.dart', ...args]);
 
-    test('no args prints usage and exits 2', () async {
+    test('no args prints usage to stderr and exits 2', () async {
       final r = await run([]);
       expect(r.exitCode, 2);
+      expect(r.stderr, contains('Usage: cueinfo'));
+    });
+
+    test('--help prints usage to stdout and exits 0', () async {
+      final r = await run(['--help']);
+      expect(r.exitCode, 0);
       expect(r.stdout, contains('Usage: cueinfo'));
     });
 
-    test('--help exits 0', () async {
-      final r = await run(['--help']);
-      expect(r.exitCode, 0);
+    test('--format without a value reports it and exits 2', () async {
+      final r = await run(['info', goodPath, '--format']);
+      expect(r.exitCode, 2);
+      expect(r.stderr, contains('missing value for --format'));
+    });
+
+    test('invalid --format is rejected before the file is read', () async {
+      final r = await run(['info', '/nonexistent.cue', '--format', 'bogus']);
+      expect(r.exitCode, 2);
+      expect(r.stderr, contains('--format must be text or json'));
     });
 
     test('info --format text prints Title', () async {
