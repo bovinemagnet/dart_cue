@@ -106,6 +106,14 @@ List<CueIssue> validateCueSheet(CueSheet sheet) {
           message: '$where: missing INDEX 01',
         ));
       }
+      for (final n in t.indices.keys) {
+        if (n < 0 || n > 99) {
+          issues.add(CueIssue(
+            severity: CueIssueSeverity.warning,
+            message: '$where: INDEX $n out of range (0-99)',
+          ));
+        }
+      }
       final start = t.startTime;
       if (start != null) {
         if (previousStart != null && start <= previousStart) {
@@ -370,7 +378,7 @@ class _Parser {
     // CATALOG
     m = _reCatalog.firstMatch(line);
     if (m != null) {
-      _catalog = m.group(1)!;
+      _catalog = _unquote(m.group(1)!);
       return;
     }
 
@@ -388,7 +396,8 @@ class _Parser {
         _warn('ISRC outside any TRACK block');
         return;
       }
-      _currentTrack!.isrc = m.group(1)!;
+      // Normalise: some rippers quote or lower-case the code.
+      _currentTrack!.isrc = _unquote(m.group(1)!).toUpperCase();
       return;
     }
 

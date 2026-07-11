@@ -30,9 +30,13 @@ Options for `info`:
 ''';
 
 Future<void> main(List<String> args) async {
-  if (args.isEmpty || args.first == '-h' || args.first == '--help') {
+  if (args.isEmpty) {
+    stderr.writeln(_usage);
+    exit(2);
+  }
+  if (args.first == '-h' || args.first == '--help') {
     stdout.writeln(_usage);
-    exit(args.isEmpty ? 2 : 0);
+    exit(0);
   }
 
   final command = args.first;
@@ -78,7 +82,11 @@ Future<CueSheet> _loadOrDie(String path) async {
   final opts = <String, String>{};
   for (int i = 0; i < args.length; i++) {
     final a = args[i];
-    if (knownFlags.contains(a) && i + 1 < args.length) {
+    if (knownFlags.contains(a)) {
+      if (i + 1 >= args.length) {
+        stderr.writeln('Error: missing value for $a.');
+        exit(2);
+      }
       opts[a] = args[++i];
     } else if (a.startsWith('--')) {
       stderr.writeln('Unknown option: $a');
@@ -104,15 +112,16 @@ Future<CueSheet> _loadOrDie(String path) async {
 
 Future<void> _cmdInfo(List<String> args) async {
   final parsed = _parseFileAndOpts(args, {'--format'});
-  final sheet = await _loadOrDie(parsed.path);
   final format = (parsed.opts['--format'] ?? 'json').toLowerCase();
-  if (format == 'text') {
-    _printText(sheet);
-  } else if (format == 'json') {
-    _printJson(sheet);
-  } else {
+  if (format != 'text' && format != 'json') {
     stderr.writeln('Error: --format must be text or json.');
     exit(2);
+  }
+  final sheet = await _loadOrDie(parsed.path);
+  if (format == 'text') {
+    _printText(sheet);
+  } else {
+    _printJson(sheet);
   }
 }
 
