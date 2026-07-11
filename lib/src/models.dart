@@ -231,10 +231,10 @@ class CueTrack {
   /// Silence to be added after the track.
   final Duration? postgap;
 
-  /// Track flags.
+  /// Track flags. Unmodifiable.
   final Set<CueFlag> flags;
 
-  /// All INDEX entries for this track.
+  /// All INDEX entries for this track. Unmodifiable.
   ///
   /// Keys are index numbers (0, 1, 2, …); values are MSF timestamps as
   /// [Duration]s.
@@ -242,6 +242,7 @@ class CueTrack {
 
   /// Track-scoped REM key→value pairs (keys stored in uppercase). Common
   /// examples are `REPLAYGAIN_TRACK_GAIN` and `REPLAYGAIN_TRACK_PEAK`.
+  /// Unmodifiable.
   final Map<String, String> remComments;
 
   /// Start time of this track (INDEX 01).
@@ -284,9 +285,9 @@ class CueTrack {
     Set<CueFlag>? flags,
     Map<int, Duration>? indices,
     Map<String, String>? remComments,
-  })  : flags = flags ?? const {},
-        indices = indices ?? const {},
-        remComments = remComments ?? const {};
+  })  : flags = Set.unmodifiable(flags ?? const <CueFlag>{}),
+        indices = Map.unmodifiable(indices ?? const <int, Duration>{}),
+        remComments = Map.unmodifiable(remComments ?? const <String, String>{});
 
   /// Structural equality across every field, including [endTime].
   ///
@@ -438,14 +439,14 @@ class CueFile {
   /// File type (WAVE, MP3, etc.).
   final CueFileType fileType;
 
-  /// Tracks belonging to this file.
+  /// Tracks belonging to this file. Unmodifiable.
   final List<CueTrack> tracks;
 
   CueFile({
     required this.filename,
     required this.fileType,
     List<CueTrack>? tracks,
-  }) : tracks = tracks ?? [];
+  }) : tracks = List.unmodifiable(tracks ?? const <CueTrack>[]);
 
   @override
   bool operator ==(Object other) =>
@@ -515,10 +516,10 @@ class CueSheet {
   /// Path to an embedded CD-Text file.
   final String? cdTextFile;
 
-  /// All FILE entries (and their tracks).
+  /// All FILE entries (and their tracks). Unmodifiable.
   final List<CueFile> files;
 
-  /// All REM key→value pairs (keys stored in uppercase).
+  /// All REM key→value pairs (keys stored in uppercase). Unmodifiable.
   final Map<String, String> remComments;
 
   /// Genre from `REM GENRE`.
@@ -567,8 +568,8 @@ class CueSheet {
     this.cdTextFile,
     List<CueFile>? files,
     Map<String, String>? remComments,
-  })  : files = files ?? [],
-        remComments = remComments ?? {};
+  })  : files = List.unmodifiable(files ?? const <CueFile>[]),
+        remComments = Map.unmodifiable(remComments ?? const <String, String>{});
 
   @override
   bool operator ==(Object other) =>

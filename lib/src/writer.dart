@@ -12,7 +12,12 @@ String toCueString(CueSheet sheet) {
   final buf = StringBuffer();
 
   void writeLine(String line) => buf.writeln(line);
-  String q(String s) => s.contains(' ') ? '"$s"' : s;
+  // Quote values that would otherwise be ambiguous: empty, containing
+  // whitespace, or containing a double quote. CUE has no escape syntax for
+  // embedded quotes; the value is wrapped verbatim, which the parser's
+  // outermost-quote stripping reads back losslessly.
+  String q(String s) =>
+      s.isEmpty || s.contains(' ') || s.contains('"') ? '"$s"' : s;
 
   if (sheet.catalog != null) writeLine('CATALOG ${sheet.catalog}');
   if (sheet.cdTextFile != null) writeLine('CDTEXTFILE ${q(sheet.cdTextFile!)}');

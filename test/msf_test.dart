@@ -57,5 +57,13 @@ void main() {
       expect(s.substring(0, 2), '01');
       expect(s.substring(3, 5), '05');
     });
+
+    test('negative duration keeps its sign', () {
+      expect(formatMsf(const Duration(minutes: -2)), '-02:00:00');
+    });
+
+    test('negative duration that rounds to zero has no sign', () {
+      expect(formatMsf(const Duration(microseconds: -1)), '00:00:00');
+    });
   });
 }

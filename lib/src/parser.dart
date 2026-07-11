@@ -71,6 +71,7 @@ List<CueIssue> validateCueSheet(CueSheet sheet) {
 
   int? previousTrackNumber;
   for (final file in sheet.files) {
+    Duration? previousStart;
     if (file.filename.isEmpty) {
       issues.add(const CueIssue(
         severity: CueIssueSeverity.warning,
@@ -104,6 +105,16 @@ List<CueIssue> validateCueSheet(CueSheet sheet) {
           severity: CueIssueSeverity.warning,
           message: '$where: missing INDEX 01',
         ));
+      }
+      final start = t.startTime;
+      if (start != null) {
+        if (previousStart != null && start <= previousStart) {
+          issues.add(CueIssue(
+            severity: CueIssueSeverity.warning,
+            message: '$where: INDEX 01 does not increase monotonically',
+          ));
+        }
+        previousStart = start;
       }
       if (t.isrc != null &&
           !RegExp(r'^[A-Z]{2}[A-Z0-9]{3}\d{7}$').hasMatch(t.isrc!)) {
@@ -166,9 +177,9 @@ class _TrackBuilder {
         isrc: isrc,
         pregap: pregap,
         postgap: postgap,
-        flags: Set.unmodifiable(flags),
-        indices: Map.unmodifiable(indices),
-        remComments: Map.unmodifiable(remComments),
+        flags: flags,
+        indices: indices,
+        remComments: remComments,
       );
 }
 
@@ -255,8 +266,8 @@ class _Parser {
       songwriter: _songwriter,
       catalog: _catalog,
       cdTextFile: _cdTextFile,
-      files: List.unmodifiable(_files),
-      remComments: Map.unmodifiable(_remComments),
+      files: _files,
+      remComments: _remComments,
     );
   }
 
@@ -307,6 +318,10 @@ class _Parser {
       if (_currentTrack == null) {
         _warn('INDEX outside any TRACK block');
         return;
+      }
+      if (_currentTrack!.indices.containsKey(idx)) {
+        _warn('duplicate INDEX ${idx.toString().padLeft(2, '0')} '
+            '(later value wins)');
       }
       _currentTrack!.indices[idx] = ts;
       return;
@@ -440,6 +455,12 @@ class _Parser {
       }
       return;
     }
+
+    // A bare REM is a valid (empty) comment; anything else is noise worth
+    // surfacing when diagnostics are requested.
+    if (line.toUpperCase() != 'REM') {
+      _warn('unrecognised line (ignored)');
+    }
   }
 
   void _finaliseTrack() {
@@ -455,9 +476,7 @@ class _Parser {
       _files.add(CueFile(
         filename: _currentFilename ?? '',
         fileType: _currentFileType,
-        tracks: List.unmodifiable(
-          _currentTracks.map((b) => b.build()).toList(),
-        ),
+        tracks: [for (final b in _currentTracks) b.build()],
       ));
     }
     _currentFilename = null;

@@ -205,6 +205,97 @@ FILE "a.wav" WAVE
     });
   });
 
+  group('unrecognised lines', () {
+    test('junk line is reported with line number', () {
+      const cue = '''
+JUNKLINE foo bar
+FILE "a.wav" WAVE
+  TRACK 01 AUDIO
+    INDEX 01 00:00:00
+''';
+      final issues = parseCueSheetWithDiagnostics(cue).issues;
+      final unrecognised =
+          issues.where((i) => i.message.contains('unrecognised')).toList();
+      expect(unrecognised.length, 1);
+      expect(unrecognised.single.line, 1);
+      expect(unrecognised.single.rawLine, 'JUNKLINE foo bar');
+    });
+
+    test('FILE line missing its type token is reported', () {
+      const cue = '''
+FILE "a.wav"
+  TRACK 01 AUDIO
+    INDEX 01 00:00:00
+''';
+      final issues = parseCueSheetWithDiagnostics(cue).issues;
+      expect(
+          issues.any((i) => i.message.contains('unrecognised') && i.line == 1),
+          isTrue);
+    });
+
+    test('bare REM comment line is not reported', () {
+      const cue = '''
+REM
+FILE "a.wav" WAVE
+  TRACK 01 AUDIO
+    INDEX 01 00:00:00
+''';
+      final issues = parseCueSheetWithDiagnostics(cue).issues;
+      expect(issues, isEmpty);
+    });
+  });
+
+  group('duplicate INDEX', () {
+    test('duplicate INDEX number in one track is reported, last wins', () {
+      const cue = '''
+FILE "a.wav" WAVE
+  TRACK 01 AUDIO
+    INDEX 01 00:00:00
+    INDEX 01 01:00:00
+''';
+      final result = parseCueSheetWithDiagnostics(cue);
+      expect(
+          result.issues
+              .any((i) => i.message.contains('duplicate INDEX') && i.line == 4),
+          isTrue);
+      expect(result.sheet!.files.single.tracks.single.indices[1],
+          const Duration(minutes: 1));
+    });
+  });
+
+  group('INDEX 01 monotonicity', () {
+    test('out-of-order INDEX 01 times are reported by validateCueSheet', () {
+      const cue = '''
+FILE "a.wav" WAVE
+  TRACK 01 AUDIO
+    INDEX 01 05:00:00
+  TRACK 02 AUDIO
+    INDEX 01 03:00:00
+''';
+      final sheet = parseCueSheet(cue)!;
+      final issues = validateCueSheet(sheet);
+      expect(
+          issues.any((i) =>
+              i.message.contains('TRACK 02') &&
+              i.message.contains('INDEX 01') &&
+              i.message.contains('monotonically')),
+          isTrue);
+    });
+
+    test('increasing INDEX 01 times across files are not reported', () {
+      const cue = '''
+FILE "a.wav" WAVE
+  TRACK 01 AUDIO
+    INDEX 01 03:00:00
+FILE "b.wav" WAVE
+  TRACK 02 AUDIO
+    INDEX 01 00:00:00
+''';
+      final sheet = parseCueSheet(cue)!;
+      expect(validateCueSheet(sheet), isEmpty);
+    });
+  });
+
   group('CueIssue value semantics', () {
     test('equality and toString', () {
       const a = CueIssue(

@@ -28,6 +28,10 @@ Duration? parseMsf(String msf) {
 /// `parseMsf(formatMsf(parseMsf(x))) == parseMsf(x)` for any valid MSF
 /// string `x` — the integer-division in [parseMsf] would otherwise be
 /// compounded by truncation here and drift by a frame.
+///
+/// A negative duration (e.g. the track duration of a corrupt sheet whose
+/// INDEX 01 times run backwards) is formatted with a leading `-` so the
+/// problem stays visible; note [parseMsf] does not accept such values.
 String formatMsf(Duration duration) {
   final totalMs = duration.inMilliseconds.abs();
   final totalFrames = (totalMs * _framesPerSecond + 500) ~/ 1000;
@@ -35,7 +39,8 @@ String formatMsf(Duration duration) {
   final totalSeconds = totalFrames ~/ _framesPerSecond;
   final ss = totalSeconds % 60;
   final mm = totalSeconds ~/ 60;
-  return '${mm.toString().padLeft(2, '0')}:'
+  final sign = duration.isNegative && totalFrames > 0 ? '-' : '';
+  return '$sign${mm.toString().padLeft(2, '0')}:'
       '${ss.toString().padLeft(2, '0')}:'
       '${ff.toString().padLeft(2, '0')}';
 }

@@ -36,8 +36,9 @@ No runtime dependencies. Works on the Dart VM, AOT binaries, Flutter
 - Permissive parsing — malformed timestamps, unknown tokens and misplaced
   commands never throw; valid data is preserved. Opt in to
   `parseCueSheetWithDiagnostics` for a line-numbered warning list.
-- Unmodifiable collections on parsed sheets — safe to share across isolates
-  and cache layers without defensive copies.
+- Unmodifiable collections on every model instance, parsed or hand-built —
+  constructors defensively copy their collection arguments, so sheets are
+  safe to share across isolates and cache layers without defensive copies.
 - Structural `==` / `hashCode` / `toString` on `CueSheet`, `CueFile` and
   `CueTrack` — parsed sheets can be compared, put in `Set`s, or keyed in
   `Map`s by their content.

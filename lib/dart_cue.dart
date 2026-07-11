@@ -10,7 +10,7 @@
 ///   print(sheet?.title);
 /// }
 /// ```
-library dart_cue;
+library;
 
 export 'src/models.dart';
 export 'src/msf.dart';
