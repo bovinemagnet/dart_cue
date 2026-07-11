@@ -199,4 +199,42 @@ FILE "a.wav" WAVE
           reparsed.remComments.containsKey('REPLAYGAIN_TRACK_GAIN'), isFalse);
     });
   });
+
+  group('toCueString — quoting', () {
+    test('value containing a double quote is written quoted and round-trips',
+        () {
+      final sheet = CueSheet(title: 'ab"cd', files: [
+        CueFile(filename: 'x"y.wav', fileType: CueFileType.wave, tracks: [
+          CueTrack(
+            trackNumber: 1,
+            trackType: CueTrackType.audio,
+            indices: {1: Duration.zero},
+          ),
+        ]),
+      ]);
+      final out = toCueString(sheet);
+      expect(out, contains('TITLE "ab"cd"'));
+      expect(out, contains('FILE "x"y.wav" WAVE'));
+      final reparsed = parseCueSheet(out)!;
+      expect(reparsed.title, 'ab"cd');
+      expect(reparsed.files.single.filename, 'x"y.wav');
+    });
+
+    test('empty filename is written as "" and round-trips', () {
+      final sheet = CueSheet(files: [
+        CueFile(filename: '', fileType: CueFileType.wave, tracks: [
+          CueTrack(
+            trackNumber: 1,
+            trackType: CueTrackType.audio,
+            indices: {1: Duration.zero},
+          ),
+        ]),
+      ]);
+      final out = toCueString(sheet);
+      expect(out, contains('FILE "" WAVE'));
+      final reparsed = parseCueSheet(out)!;
+      expect(reparsed.files.single.filename, '');
+      expect(reparsed.files.single.tracks, hasLength(1));
+    });
+  });
 }

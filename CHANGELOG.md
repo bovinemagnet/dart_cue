@@ -1,6 +1,34 @@
 # Changelog
 
-## Unreleased
+## 0.1.0
+
+- **Breaking:** `CueSheet`, `CueFile` and `CueTrack` constructors now
+  defensively copy their collection arguments (`files`, `remComments`,
+  `tracks`, `flags`, `indices`) into unmodifiable collections, and the
+  defaults for omitted arguments are unmodifiable too. Previously only
+  *parsed* sheets were unmodifiable; hand-built models exposed the caller's
+  live mutable collections, so `copyWith` copies shared mutable state with
+  their source. Code that built a model and mutated its collections
+  afterwards (e.g. `sheet.files.add(...)`) will now throw
+  `UnsupportedError` — build the full collection first and pass it to the
+  constructor, or use `copyWith` with a replacement collection.
+- Writer: values that are empty or contain a double quote are now written
+  quoted (`FILE "" WAVE`, `TITLE "ab"cd"`), so such sheets survive a
+  write → parse round-trip instead of losing the FILE entry or emitting
+  ambiguous output. CUE has no escape syntax for embedded quotes; the
+  value is wrapped verbatim, which the parser reads back losslessly.
+- `formatMsf` no longer drops the sign of a negative duration: a corrupt
+  sheet whose INDEX 01 times run backwards now formats its (negative)
+  track duration as `-mm:ss:ff` instead of a plausible-looking positive
+  value.
+- Diagnostics: `parseCueSheetWithDiagnostics` now reports lines that match
+  no CUE command at all ("unrecognised line") and duplicate `INDEX`
+  numbers within a track (later value still wins). A bare `REM` line is
+  treated as an empty comment and not reported.
+- `validateCueSheet` additionally checks that `INDEX 01` times increase
+  monotonically across the tracks of each FILE.
+- Dev dependencies: `lints` 4 → 6; removed the now-flagged library name
+  from `lib/dart_cue.dart`.
 
 - GitHub Actions CI (`.github/workflows/ci.yml`): format check, analyser
   with `--fatal-warnings`, test matrix (Ubuntu/macOS/Windows × Dart
